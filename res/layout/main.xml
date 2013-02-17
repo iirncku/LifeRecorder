@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget0"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/fatnetonline" >
+
+    <Button
+        android:id="@+id/Leave"
+        android:layout_width="70px"
+        android:layout_height="50px"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/back"
+        android:text="離開"
+        android:width="100px" >
+    </Button>
+	<LinearLayout 
+	    android:id="@+id/Button"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        >
+	    <Button
+        android:id="@+id/Monitor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="開始記錄"
+        android:textSize="20sp" />
+    
+    <Button
+        android:id="@+id/Stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="暫停紀錄"
+        android:textSize="20sp" />
+	</LinearLayout>
+    
+
+    <TextView
+        android:id="@+id/Text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/Button"
+        android:layout_alignParentLeft="true"
+        android:gravity="center"
+        android:text="@string/nonRecording"
+        android:textSize="20sp" />
+
+</RelativeLayout>
