@@ -1,3 +1,9 @@
+/*=====================================================================================*/
+/*Project : 		LifeRecorder App
+/*執行功能：	隨時記錄加速度與陀螺儀之資料，於手機待命時也可記錄
+/*關聯檔案：	Features.java
+/*=====================================================================================*/
+
 package com.smatch.liferecorder;
 
 import static android.hardware.SensorManager.SENSOR_ACCELEROMETER;
@@ -34,13 +40,11 @@ import android.util.Log;
 
 @SuppressWarnings("deprecation")
 public class SensorService extends Service implements SensorListener{
-	private final static String TAG = "Smatch"; // debug tag
-	private String userid="JHJ";
+	private String userid="JHJ";		//使用者ID
 	private SensorManager sensormgr;
 	private float x,y,z,v0,v1,v2;
 	private int listsize=0;
 	private String monitorDate = "";
-
 	
 	//傳按下啟動的日期作為存檔的資料夾名稱
 	private String datestring;
@@ -72,23 +76,22 @@ public class SensorService extends Service implements SensorListener{
 	@Override
 	public void onCreate(){
 		super.onCreate();
-		Log.d(TAG,"OnCreate");
 	}
 
 	@Override
 	public void onStart(Intent intent, int startId) {
-		Log.d(TAG,"OnStart");
-		// objHandler.postDelayed(mTasks, 3000);
 		super.onStart(intent, startId);
+		/*		取得Notification的服務		*/
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		sensormgr = (SensorManager)getSystemService(SENSOR_SERVICE);
     	sensormgr.registerListener(SensorService.this,SENSOR_ACCELEROMETER|SENSOR_ORIENTATION,SENSOR_DELAY_FASTEST);
+		/*		設置Receiver的篩選		*/
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("ACTSTOP");
-		registerReceiver(mBroadcastReceiver, filter); // mBroadcastReceiver存取電池計量
+		registerReceiver(mBroadcastReceiver, filter);
 
 		hm = new MyHandler(Looper.getMainLooper());
-		msg = hm.obtainMessage(4);
+		msg = hm.obtainMessage(4);		// 啟動資料收集的Thread
 		hm.sendMessage(msg);
 		
 		noti();
@@ -96,8 +99,6 @@ public class SensorService extends Service implements SensorListener{
 
 	@Override
 	public void onDestroy() {
-		Log.d(TAG,"OnDestroy");
-		Log.d(TAG,"STOP SELF");
 		this.mBroadcastReceiver = null;
 		notificationManager.cancel("Daily", 0);
 		flag = false;
@@ -123,23 +124,24 @@ public class SensorService extends Service implements SensorListener{
 		super.onDestroy();
 	}
 
+	/*		處理收到BroadCast時的事件		*/
 	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
 			if (action.equals("ACTSTOP")) {
-				Log.d(TAG,"ACTSTOP");
+				/*	結束Thread		*/
 				msg = hm.obtainMessage(3);
 				hm.sendMessage(msg);
 			}
 		}
 	};
 	
+	/*		設置Notification並顯示		*/
 	public void noti() {
 		// 設定當按下這個通知之後要執行的activity
 		notificationManager.cancel("Daily", 0);
-		// Log.d("Record","!!!!!!!"+Qt.size());
 		Intent notifyIntent = new Intent(SensorService.this, LifeRecorder.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		// notifyIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -167,18 +169,14 @@ public class SensorService extends Service implements SensorListener{
 		@Override
 		public void handleMessage(Message msg) {
 			if (msg.what == 3) {
+				/*		取消以啟用的服務與Receiver		*/
 				try{
 					notificationManager.cancel("Daily", 0);
-					Log.d(TAG,"notification Cancel");
 					unregisterReceiver(mBroadcastReceiver);
 					mBroadcastReceiver = null;
-					Log.d(TAG,"unregisterReceiver");	
 				}finally{
 					flag = false;
 				}
-							
-//				ActService.this.onDestroy();
-//				stopSelf();
 			} else if(msg.what==4) {
        		// 資料擷取寫在另一條執行緒，每7秒更新一次資料
 					myThread = new Thread() {
@@ -228,12 +226,10 @@ public class SensorService extends Service implements SensorListener{
 										WriteFeatureFile( x_list, y_list, z_list, v0_list,v1_list,v2_list, date1);          //沒開GPS，所以距離和速度用-1
 									}
 									else{
-										Log.d(TAG, "msg: " + "list size is not equal to 140");
 									}
 									timer2.cancel();
 								}
 							}
-							Log.d(TAG,"Thread Stop");
 							Message Mesg = hm.obtainMessage(6);
 							hm.sendMessage(Mesg);
 						}
@@ -241,6 +237,7 @@ public class SensorService extends Service implements SensorListener{
 					myThread.setDaemon(true);
 					myThread.start();
 			} else if(msg.what==5){
+				/*		記錄最新變更的時間，存到待更新的列表		*/
 				if (updateDate.length() != 0) {
 					File fileDir = new File("/sdcard/DailyRecord/");
 					if (!fileDir.exists()) {
@@ -265,17 +262,14 @@ public class SensorService extends Service implements SensorListener{
 
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
-		Log.d(TAG, "msg: " + "Provider Disabled");
 	}
 
 	public void onProviderEnabled(String provider) {
 		// TODO Auto-generated method stub
-		Log.d(TAG, "msg: " + "Provider enabled");
 	}
 
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
-		Log.d(TAG, "msg: " + "Status");
 	}
 	
 	/* 存3-axis raw data檔案 檔名:資料收集的開始時間(yyyy-MM-dd-HH-mm-ss) */
@@ -321,7 +315,6 @@ public class SensorService extends Service implements SensorListener{
 						}
 						if(x.get(i).isNaN())
 							x.set(i, (float) 0);
-						Log.d(TAG, "Nan: " + "NaN?????");
 						bufOut.append(x.get(i) + "\t" + y.get(i) + "\t" + z.get(i)
 								+ "\n");
 					}
@@ -331,7 +324,6 @@ public class SensorService extends Service implements SensorListener{
 		}
 		catch(Exception e)
 		{
-			Log.d(TAG, "msg: " + "raw error...");
 			e.printStackTrace();
 		}
 	}
@@ -382,10 +374,7 @@ public class SensorService extends Service implements SensorListener{
 			}
 			
 		} catch (Exception e) {
-			Log.d(TAG, "msg: " + "feature save error...");
 		}
-
-		Log.d(TAG, "msg: " + "feature saved");
 	}
 	/*				Construct Ori Features			*/
 	public List<Float> middleList(List<Float> list) {

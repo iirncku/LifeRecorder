@@ -1,5 +1,8 @@
-package com.smatch.liferecorder;
-
+/*=====================================================================================*/
+/*Project : 		LifeRecorder App
+/*執行功能：	對Data做濾波處理
+/*=====================================================================================*/
+package smatch.com.DC;
 import java.util.ArrayList;
 import java.util.List;
 /** @description 存放濾波器的類別 */
