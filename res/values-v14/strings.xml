@@ -1,0 +1,8 @@
+<resources>
+    <string name="Recording">紀錄中....\n 若要停止請按MENU\n選擇暫停紀錄</string>
+    <string name="app_name">LifeRecorder</string>
+    <string name="could_not_write_to_file">Could not write to file </string>
+    <string name="nonRecording">請按下按鈕開始記錄</string>
+    <string name="test">Daily\nRecord</string>
+    <string name="label4x2">Daily Record 4x2</string>
+</resources>
